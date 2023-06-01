@@ -3,19 +3,28 @@ package ca.sheridan.syst17796.groupdeliverable.ui;
 import java.util.Scanner;
 import java.util.InputMismatchException;
 
+// Purpose of Class is for all Input with built in validation
+// This validation ensures that entry matches data type;
+// If further validation is required; it should be handled on a per use basis
+// This Class also has some utilities: Clearing the console; Forcing a wait before continuing
+
+// Note: Variable names are [x]Temp where [x] = the variable type and Temp = 'Temporary'
+//bFlag is a boolean 'Good Input' flag; if false, there is an error with input that may have thrown an exception
+// Note: Regions are collapsible in VS Code; they serve little other practical purpose
+
 public class UserInput {
     Scanner input = new Scanner(System.in);
     // #region Declare Variables
     // #region Number Variables
-    double dTemp = 0.0;
-    float fTemp = 0.0f;
-    int iTemp = 0; // #endregion numbers
+    private double dTemp = 0.0;
+    private float fTemp = 0.0f;
+    private int iTemp = 0; // #endregion numbers
     // #region text variables
-    String sTemp = "";
-    char cTemp = ' ';
-    boolean bTemp = false; // #endregion text
+    private String sTemp = "";
+    private char cTemp = ' ';
+    private boolean bTemp = false; // #endregion text
 
-    boolean bFlag = false; // #endregion variables
+    private boolean bFlag = false; // #endregion variables
 
     // #region input
     // #region input numbers
@@ -82,7 +91,7 @@ public class UserInput {
         } // runs while input is invalid
         return bTemp; // returns a valid boolean
     } // #endregion text input
-    // #endregion input
+      // #endregion input
 
     // #region add-ons
     public void aWait() {
