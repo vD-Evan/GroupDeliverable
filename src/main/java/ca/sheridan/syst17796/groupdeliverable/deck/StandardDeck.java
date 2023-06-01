@@ -4,29 +4,29 @@ import ca.sheridan.syst17796.groupdeliverable.card.CreateCard;
 import java.util.ArrayList;
 
 public class StandardDeck {
-    private ArrayList<CreateCard> alCards;
-    private ArrayList<CreateCard> alDealtCards;
+    private ArrayList<CreateCard> deck;
+    private ArrayList<CreateCard> dealtCards;
 
     public StandardDeck() {
-        alCards = new ArrayList<>();
-        alDealtCards = new ArrayList<>();
-        initializeDeck();
+        deck = new ArrayList<>();
+        dealtCards = new ArrayList<>();
+        initializeDeck(); // On building a deck, add the cards
     }
 
     private void initializeDeck() {
-        for (int iSuit = 1; iSuit <= 4; iSuit++) {
-            for (int iValue = 1; iValue <= 13; iValue++) {
-                CreateCard objCard = new CreateCard(iSuit, iValue);
-                alCards.add(objCard);
+        for (int suitAsInt = 1; suitAsInt <= 4; suitAsInt++) {
+            for (int valueAsInt = 1; valueAsInt <= 13; valueAsInt++) {
+                CreateCard card = new CreateCard(suitAsInt, valueAsInt);
+                deck.add(card); // adds cards Ace -> King; suit by suit
             }
         }
     }
 
     public void shuffle() {
-        DeckUtils.shuffle(alCards, alDealtCards);
+        DeckUtils.shuffle(deck, dealtCards);
     }
 
     public CreateCard dealCard() {
-        return DeckUtils.dealCard(alCards, alDealtCards);
+        return DeckUtils.dealCard(deck, dealtCards);
     }
 }
