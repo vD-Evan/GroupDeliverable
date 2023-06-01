@@ -1,7 +1,7 @@
 package ca.sheridan.syst17796.groupdeliverable.card;
 
 public class CreateCard {
-    private int suitAsInt;
+    private int suitAsInt; // Handle suits as integers by default for ease of implementation
     private int valueAsInt;
 
     public CreateCard(int suitAsInt, int valueAsInt) {
@@ -26,9 +26,9 @@ public class CreateCard {
     }
 
     @Override
-    public String toString() {
-        String suitAsString = CardUtils.getSuitString(suitAsInt);
-        String valueAsString = CardUtils.getRankString(valueAsInt);
+    public String toString() { // Translation of Cards into Strings is handled by Card Utilities
+        String suitAsString = CardUtils.getSuitString(suitAsInt); // And passed here to limit
+        String valueAsString = CardUtils.getRankString(valueAsInt); // Import Statements
         return valueAsString + " of " + suitAsString;
     }
 }

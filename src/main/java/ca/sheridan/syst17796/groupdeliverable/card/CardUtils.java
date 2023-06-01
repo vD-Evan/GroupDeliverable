@@ -1,11 +1,11 @@
 package ca.sheridan.syst17796.groupdeliverable.card;
 
 public class CardUtils {
-    public static String getRankString(int iValue) {
-        if (iValue >= 2 && iValue <= 10) {
-            return String.valueOf(iValue);
+    public static String getRankString(int valueAsInt) {
+        if (valueAsInt >= 2 && valueAsInt <= 10) {
+            return String.valueOf(valueAsInt); // Simply returns the value
         } else {
-            switch (iValue) {
+            switch (valueAsInt) { // For Ace and Face cards
                 case 1:
                     return "Ace";
                 case 11:
@@ -20,8 +20,8 @@ public class CardUtils {
         }
     }
 
-    public static String getSuitString(int iSuit) {
-        switch (iSuit) {
+    public static String getSuitString(int suitAsInt) {
+        switch (suitAsInt) {
             case 1:
                 return "Hearts";
             case 2:
