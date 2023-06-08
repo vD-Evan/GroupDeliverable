@@ -1,9 +1,10 @@
 package ca.sheridan.syst17796.groupdeliverable.game;
 
-import ca.sheridan.syst17796.groupdeliverable.misc.Player;
-import ca.sheridan.syst17796.groupdeliverable.ui.UserInput;
-import ca.sheridan.syst17796.groupdeliverable.card.CreateCard;
 import ca.sheridan.syst17796.groupdeliverable.deck.StandardDeck;
+import ca.sheridan.syst17796.groupdeliverable.card.CreateCard;
+import ca.sheridan.syst17796.groupdeliverable.misc.GameUtils;
+import ca.sheridan.syst17796.groupdeliverable.ui.UserInput;
+import ca.sheridan.syst17796.groupdeliverable.misc.Player;
 import java.util.ArrayList;
 
 public class BlackJack {
@@ -16,9 +17,10 @@ public class BlackJack {
         this.deck = new StandardDeck();
     }
 
-    public void start() {
+    public void runGame() {
         // Shuffle the deck
         deck.shuffle();
+        GameUtils goTo = new GameUtils();
 
         // Deal 2 cards to each player
         for (Player player : players) {
@@ -26,21 +28,13 @@ public class BlackJack {
             player.addCard(deck.dealCard());
         }
 
-        // Check if any player has an ace and a face card for a winning hand
-        for (Player player : players) {
-            if (hasAceAndFace(player)) { // If using a boolean in an if: boolean value is used (true = run if; false =
-                                         // do not run if, optionally run else)
-                System.out.println(player.getName() + " wins!");
-                return; // End the game
-            }
-        }
+        // check for any immediate winners (ie. Black Jack)
+        if (determineOutcome() == "Game Done")
+            return;
 
         // Run the Game
-        boolean allPlayersStand = false;
-        boolean gameEnd = false; // May delete this variable; it appears as though it has no functionality and
-                                 // exists as an artifact of an older concept
-        while (!allPlayersStand && players.size() > 1 && !gameEnd) { // Need to workshop this condition; allow for an
-                                                                     // easy cancel game condition
+        boolean gameEnd = false;
+        while (!gameEnd) {
             for (int i = 0; i < players.size(); i++) {
                 Player currentPlayer = players.get(i);
                 if (calculateHandValueForGame(currentPlayer) > 21 || currentPlayer.hasDecidedToStand()) {
@@ -53,36 +47,20 @@ public class BlackJack {
                 // Prompt the player for their action
                 getAction(currentPlayer);
 
-                // Check for game-ending condition, switch the result
-                String winner = determineWinner(currentPlayer);
-                switch (winner) {
-                    case "Bust":
-                        System.out.println("All Players have Bust. Please Play Again");
-                        return;
-                    case "Continue": // separating for further versatility
-                        continue;
-                    default: // Might tweak the display winner message.
-                        System.out.println(winner + " wins!");
-                        return;
+                if (determineOutcome() == "Game Done")
+                    gameEnd = true;
+                else if (determineOutcome() == "All Bust") {
+                    get.aCleanSlate();
+                    System.out.println("End of Game - All Players Bust.");
+                    gameEnd = true;
                 }
+
+                if (!gameEnd)
+                    goTo.nextPlayer(); // Only run this after checking for winner; no need to start new round if
+                                       // current round ends game
             }
+
         }
-    }
-
-    private boolean hasAceAndFace(Player player) {
-        boolean hasAce = false;
-        boolean hasFace = false;
-
-        // Sets Ace to 11, face to 10, for early win-condition
-        for (CreateCard card : player.getHand()) {
-            if (card.getValueAsInt() == 1) { // Ace
-                hasAce = true;
-            } else if (card.getValueAsInt() >= 11 && card.getValueAsInt() <= 13) { // Face card (Jack, Queen, King)
-                hasFace = true;
-            }
-        }
-
-        return hasAce && hasFace; // Returns true *only if* both conditions are true
     }
 
     private void showTable(Player currentPlayer) {
@@ -92,7 +70,12 @@ public class BlackJack {
         // Display other player's cards
         for (Player player : players) {
             if (player != currentPlayer) { // Do not show current player's card yet
-                System.out.println("Player: " + player.getName());
+                String playerState = " - Active";
+                if (calculateHandValueForGame(player) > 21)
+                    playerState = " - Bust";
+                else if (player.hasDecidedToStand())
+                    playerState = " - Stand";
+                System.out.println("Player: " + player.getName() + playerState);
                 System.out.print("Cards: ");
                 ArrayList<CreateCard> hand = player.getHand();
                 for (int i = 1; i < hand.size(); i++) { // Do not show the first card dealt; each player has a "Hidden"
@@ -142,55 +125,125 @@ public class BlackJack {
                 System.out.println("Invalid choice. Please try again."); // Ensures a valid (1 or 2) has been entered
             }
         }
-
-        // Code to allow for multiple players to use this code without seeing each
-        // other's hidden card
-        // May move this to a separate method later
-        get.aWait();
-        get.aCleanSlate();
-        System.out.println("Please pass the device to the next player.");
-        get.aWait();
     }
 
-    private String determineWinner(Player currentPlayer) {
-        boolean allPlayersBust = true;
-        Player winner = null;
-        int highestScore = 0;
+    private String determineOutcome() {
+        int numOfPlayers = players.size();
+        int numOfBusts = 0;
+        int numOfStands = 0;
 
-        int handValue = calculateHandValueForGame(currentPlayer); // Variable used instead of function to keep code
-                                                                  // concise
-        if (handValue == 21)
-            return currentPlayer.getName(); // First one to proc this will have the fewest cards in their hand; thus the
-                                            // winner
+        for (int i = 0; i < numOfPlayers; i++) {
+            Player player = players.get(i);
+            if (calculateHandValueForGame(player) > 21)
+                numOfBusts++;
+            if (player.hasDecidedToStand())
+                numOfStands++;
+        }
+        if (numOfBusts == numOfPlayers)
+            return "All Bust";
+        if (numOfBusts == (numOfPlayers - 1)) {
+            winMessage(numOfPlayers);
+            return "Game Done";
+        }
+        if ((numOfBusts + numOfStands) == numOfPlayers) {
+            winMessage(numOfPlayers);
+            return "Game Done";
+        } else
+            return "Continue";
+    }
 
-        // Should check to see if all but one player has bust regardless if the last
-        // player has decided to Stand.
-        // This check would go here.
+    private void winMessage(int numOfPlayers) {
+        get.aCleanSlate();
+        ArrayList<Player> validPlayers = new ArrayList<>();
+        ArrayList<Player> bustPlayers = new ArrayList<>();
 
-        // Checks to ensure not all players exceed 21;
-        for (Player player : players) {
-            handValue = calculateHandValueForGame(player);
+        for (int i = 0; i < numOfPlayers; i++) {
+            Player player = players.get(i);
+            int handValue = calculateHandValueForGame(player);
+
             if (handValue <= 21)
-                allPlayersBust = false;
+                validPlayers.add(player);
+            else
+                bustPlayers.add(player);
         }
-        if (allPlayersBust)
-            return "Bust";
-        // If it reaches here, not all players have bust.
+        sortPlayers(bustPlayers);
+        sortPlayers(validPlayers);
 
-        for (Player player : players) { // Checks to see if there are still active (ie. those not yet deceided to
-                                        // "Stand") players
-            handValue = calculateHandValueForGame(player);
-            if (!player.hasDecidedToStand() && handValue <= 21)
-                return "Continue"; // At least one player is still active: Not decided to Stand, Not Bust
+        if (bustPlayers.size() > 0) {
+            System.out.println("Players that Bust:");
+            for (Player player : bustPlayers) {
+                System.out.printf("%s %s %d (%d %s).%n",
+                        player.getName(), "busts with a hand of",
+                        calculateHandValueForGame(player),
+                        player.getHand().size(), "cards");
+            }
+            System.out.println("----");
         }
 
-        // If it reaches here, all players have decided to Stand or are Bust
-        for (Player player : players) {
-            handValue = calculateHandValueForGame(player);
-            if (handValue <= 21 && handValue > highestScore)
-                winner = player;
+        Player winner = validPlayers.get(0);
+        System.out.printf("%s %s %d (%d %s).%n",
+                winner.getName(), "wins with a hand of",
+                calculateHandValueForGame(winner),
+                winner.getHand().size(), "cards");
+        if (validPlayers.size() > 1) {
+            System.out.println("----");
+            System.out.println("Runners Up:");
+            for (int i = 1; i < validPlayers.size(); i++) {
+                Player player = validPlayers.get(i);
+                System.out.printf("#%d - %s %s %d (%d %s).%n", (validPlayers.indexOf(player) + 1),
+                        player.getName(), "places with a hand of",
+                        calculateHandValueForGame(player),
+                        player.getHand().size(), "cards");
+            }
         }
-        return winner.getName();
+        players.clear(); // Delete the entire players list
+        validPlayers.clear();
+        bustPlayers.clear();
+    }
+
+    private void sortPlayers(ArrayList<Player> players) {
+        for (int i = 0; i < players.size() - 1; i++) {
+            for (int j = 0; j < players.size() - i - 1; j++) {
+                Player p1 = players.get(j);
+                Player p2 = players.get(j + 1);
+
+                int handValueComparison = Integer.compare(calculateHandValueForGame(p2), calculateHandValueForGame(p1));
+                if (handValueComparison > 0) {
+                    swapPlayers(players, j, j + 1);
+                    continue;
+                }
+                if (handValueComparison < 0)
+                    continue;
+
+                int numCardsComparison = Integer.compare(p2.getHand().size(), p1.getHand().size());
+                if (numCardsComparison > 0) {
+                    swapPlayers(players, j, j + 1);
+                    continue;
+                }
+                if (numCardsComparison < 0)
+                    continue;
+
+                ArrayList<CreateCard> hand1 = p1.getHand();
+                ArrayList<CreateCard> hand2 = p2.getHand();
+                for (int k = 0; k < hand1.size(); k++) {
+                    int cardValueComparison = Integer.compare(hand2.get(k).getValueAsInt(),
+                            hand1.get(k).getValueAsInt());
+                    if (cardValueComparison > 0) {
+                        swapPlayers(players, j, j + 1);
+                        break;
+                    }
+                    if (cardValueComparison < 0) {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    private void swapPlayers(ArrayList<Player> players, int i, int j) {
+        Player temp = players.get(i);
+        players.set(i, players.get(j));
+        players.set(j, temp);
     }
 
     private int calculateHandValueForGame(Player player) { // Needs a special Hand Value to accommodate for Aces being 1

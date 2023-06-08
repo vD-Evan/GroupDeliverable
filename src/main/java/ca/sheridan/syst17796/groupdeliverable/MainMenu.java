@@ -47,14 +47,13 @@ public class MainMenu {
         get.aCleanSlate();
         System.out.println("You have chosen " + gameChoice);
 
-        ArrayList<Player> players = getPlayers(gameChoice); // Builds a list of players; will need to manually edit this
-                                                            // if adding a game with a fixed amount of players
+        ArrayList<Player> players = getPlayers(gameChoice); // Builds a list of players;
 
         if (players != null) { // Allows for users to select a different game.
             switch (gameChoice) { // Builds a new instance of the game, launches it
                 case "Black Jack":
                     BlackJack playGame = new BlackJack(players);
-                    playGame.start();
+                    playGame.runGame();
                     break;
                 default:
                     System.out.println("Invalid game choice.");
