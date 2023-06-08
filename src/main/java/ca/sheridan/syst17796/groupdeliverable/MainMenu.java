@@ -1,3 +1,9 @@
+/* Class: SYST 17796 - Fundamentals of Software Design and Development
+ * Assignment: Group Deliverable
+ * Authors: Juliana Sebastian, May Myat Noe Swe, Evan VanDuzer
+ * Last Revision: 8 June 2023 
+ */
+
 package ca.sheridan.syst17796.groupdeliverable;
 
 import ca.sheridan.syst17796.groupdeliverable.misc.Player;
