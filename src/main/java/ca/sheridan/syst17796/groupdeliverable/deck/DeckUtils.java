@@ -17,13 +17,13 @@ public class DeckUtils {
         Collections.shuffle(deck); // Shuffle all the cards in the deck
     }
 
-    public static CreateCard dealCard(ArrayList<CreateCard> deck, ArrayList<CreateCard> alDealtCards) {
+    public static CreateCard dealCard(ArrayList<CreateCard> deck, ArrayList<CreateCard> DealtCards) {
         if (deck.isEmpty()) {
             return null; // To be handled on a game-by-game basis
         } // May add additional code and overwrite if most games have similar results
 
         CreateCard card = deck.remove(0); // Remove and return the top card
-        alDealtCards.add(card); // Add the card to the dealt cards list
+        DealtCards.add(card); // Add the card to the dealt cards list
         return card; // Sends top card to calling method.
     }
 }
