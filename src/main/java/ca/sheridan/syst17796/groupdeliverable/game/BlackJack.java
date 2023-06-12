@@ -1,7 +1,7 @@
 /* Class: SYST 17796 - Fundamentals of Software Design and Development
  * Assignment: Group Deliverable
  * Authors: Juliana Sebastian, May Myat Noe Swe, Evan VanDuzer
- * Last Revision: 8 June 2023 
+ * Last Revision: 10 June 2023 
  */
 
 package ca.sheridan.syst17796.groupdeliverable.game;
@@ -138,6 +138,7 @@ public class BlackJack {
         int numOfBusts = 0;
         int numOfStands = 0;
 
+        // finds the amount of players bust and standing for later comparisons:
         for (int i = 0; i < numOfPlayers; i++) {
             Player player = players.get(i);
             if (calculateHandValueForGame(player) > 21)
@@ -145,24 +146,33 @@ public class BlackJack {
             if (player.hasDecidedToStand())
                 numOfStands++;
         }
+
+        // Finds if everyone has bust
         if (numOfBusts == numOfPlayers)
             return "All Bust";
+
+        // Finds if all but one has bust, if so, ends the game
         if (numOfBusts == (numOfPlayers - 1)) {
             winMessage(numOfPlayers);
             return "Game Done";
         }
+
+        // Finds the number of active players, if no active players remain, ends the
+        // game
         if ((numOfBusts + numOfStands) == numOfPlayers) {
             winMessage(numOfPlayers);
             return "Game Done";
         } else
-            return "Continue";
+            return "Continue"; // If it reaches here, there are active players and game continues
     }
 
     private void winMessage(int numOfPlayers) {
-        get.aCleanSlate();
+        get.aCleanSlate(); // Clears console for readability
         ArrayList<Player> validPlayers = new ArrayList<>();
         ArrayList<Player> bustPlayers = new ArrayList<>();
 
+        // Sorts the player list into two lists, one for players that bust and the other
+        // for remaining players
         for (int i = 0; i < numOfPlayers; i++) {
             Player player = players.get(i);
             int handValue = calculateHandValueForGame(player);
@@ -172,9 +182,10 @@ public class BlackJack {
             else
                 bustPlayers.add(player);
         }
-        sortPlayers(bustPlayers);
+        sortPlayers(bustPlayers); // Sorts both lists based on custom parameters
         sortPlayers(validPlayers);
 
+        // Displays but players.
         if (bustPlayers.size() > 0) {
             System.out.println("Players that Bust:");
             for (Player player : bustPlayers) {
@@ -186,11 +197,15 @@ public class BlackJack {
             System.out.println("----");
         }
 
+        // Displays winner; if code enters this method, at least one player has a valid
+        // hand
         Player winner = validPlayers.get(0);
         System.out.printf("%s %s %d (%d %s).%n",
                 winner.getName(), "wins with a hand of",
                 calculateHandValueForGame(winner),
                 winner.getHand().size(), "cards");
+
+        // Displays other valid players along with their score
         if (validPlayers.size() > 1) {
             System.out.println("----");
             System.out.println("Runners Up:");
@@ -202,43 +217,56 @@ public class BlackJack {
                         player.getHand().size(), "cards");
             }
         }
-        players.clear(); // Delete the entire players list
-        validPlayers.clear();
-        bustPlayers.clear();
-    }
+
+        players.clear(); // While JAVA has a built in garbage collection for variables
+        validPlayers.clear(); // no longer being referenced, this explicitly pushes the
+        bustPlayers.clear(); // data to garbage and serves to clear up memory usage
+    } // In practice, this will only have a noticeable effect after many (10000s)
+      // games.
 
     private void sortPlayers(ArrayList<Player> players) {
+
+        // Using bubble sort to show how the sorting works rather than the built-in
+        // collections method
         for (int i = 0; i < players.size() - 1; i++) {
             for (int j = 0; j < players.size() - i - 1; j++) {
-                Player p1 = players.get(j);
-                Player p2 = players.get(j + 1);
+                // Gets the currently indexed player and the next player for comparison
+                Player player1 = players.get(j);
+                Player player2 = players.get(j + 1);
 
-                int handValueComparison = Integer.compare(calculateHandValueForGame(p2), calculateHandValueForGame(p1));
-                if (handValueComparison > 0) {
+                // Gets the two player's hand value
+                int handValue1 = calculateHandValueForGame(player1);
+                int handValue2 = calculateHandValueForGame(player2);
+                if (handValue1 < handValue2) { // if second player has higher value hand, swap
                     swapPlayers(players, j, j + 1);
                     continue;
                 }
-                if (handValueComparison < 0)
+                if (handValue1 > handValue2) // if first player has a higher hand value, don't swap
                     continue;
 
-                int numCardsComparison = Integer.compare(p2.getHand().size(), p1.getHand().size());
-                if (numCardsComparison > 0) {
+                // If it reaches here, hand value of both players is equal; compare hand size
+                int handSize1 = player1.getHand().size(); // with the smaller hand being higher valued
+                int handSize2 = player2.getHand().size();
+                if (handSize1 > handSize2) {
                     swapPlayers(players, j, j + 1);
                     continue;
                 }
-                if (numCardsComparison < 0)
+                if (handSize1 < handSize2)
                     continue;
 
-                ArrayList<CreateCard> hand1 = p1.getHand();
-                ArrayList<CreateCard> hand2 = p2.getHand();
+                // If it reaches here, hand value and size is equal; sort the hand and compare
+                // high card
+                ArrayList<CreateCard> hand1 = player1.getHand(); // value with higher taking priority.
+                ArrayList<CreateCard> hand2 = player2.getHand(); // in the case of a tie, next highest card
+                sortHand(hand1); // value is compared, and so on.
+                sortHand(hand2);
+
                 for (int k = 0; k < hand1.size(); k++) {
-                    int cardValueComparison = Integer.compare(hand2.get(k).getValueAsInt(),
-                            hand1.get(k).getValueAsInt());
-                    if (cardValueComparison > 0) {
+                    if (hand1.get(k).getValueAsInt() < hand2.get(k).getValueAsInt()) {
                         swapPlayers(players, j, j + 1);
                         break;
                     }
-                    if (cardValueComparison < 0) {
+                    if (hand1.get(k).getValueAsInt() > hand2.get(k).getValueAsInt()) {
                         break;
                     }
                 }
@@ -246,8 +274,29 @@ public class BlackJack {
         }
     }
 
+    private void sortHand(ArrayList<CreateCard> hand) {
+
+        // Again, a simple bubble sort.
+        int n = hand.size();
+        boolean swapped;
+        do {
+            swapped = false;
+            for (int i = 0; i < n - 1; i++) {
+                CreateCard card1 = hand.get(i); // Gets indexed card and the next one in the hand
+                CreateCard card2 = hand.get(i + 1);
+                if (card1.getValueAsInt() < card2.getValueAsInt()) { // Compares the value and, if
+                    hand.set(i, card2); // greater, switches the index of the two compared cards.
+                    hand.set(i + 1, card1);
+                    swapped = true;
+                }
+            }
+            n--;
+        } while (swapped);
+
+    }
+
     private void swapPlayers(ArrayList<Player> players, int i, int j) {
-        Player temp = players.get(i);
+        Player temp = players.get(i); // Similar to sortHand, this swaps players by using a temporary Player object
         players.set(i, players.get(j));
         players.set(j, temp);
     }
