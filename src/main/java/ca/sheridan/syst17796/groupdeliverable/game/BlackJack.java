@@ -1,7 +1,7 @@
 /* Class: SYST 17796 - Fundamentals of Software Design and Development
  * Assignment: Group Deliverable
  * Authors: Juliana Sebastian, May Myat Noe Swe, Evan VanDuzer
- * Last Revision: 8 June 2023 
+ * Last Revision: 20 August 2023 
  */
 
 package ca.sheridan.syst17796.groupdeliverable.game;
@@ -13,9 +13,7 @@ import ca.sheridan.syst17796.groupdeliverable.ui.UserInput;
 import ca.sheridan.syst17796.groupdeliverable.misc.Player;
 import java.util.ArrayList;
 
-public class BlackJack {
-    private ArrayList<Player> players;
-    private StandardDeck deck;
+public class BlackJack extends AbstractGame{
     UserInput get = new UserInput();
 
     public BlackJack(ArrayList<Player> players) {
@@ -23,6 +21,7 @@ public class BlackJack {
         this.deck = new StandardDeck();
     }
 
+    @Override
     public void runGame() {
         // Shuffle the deck
         deck.shuffle();
@@ -133,7 +132,8 @@ public class BlackJack {
         }
     }
 
-    private String determineOutcome() {
+    @Override
+    public String determineOutcome() {
         int numOfPlayers = players.size();
         int numOfBusts = 0;
         int numOfStands = 0;
@@ -278,6 +278,5 @@ public class BlackJack {
 
         return handValue;
     }
-
-    // Potential for a new Method to handle displaying win / game-end screen
 }
+    // Potential for a new Method to handle displaying win / game-end screen
